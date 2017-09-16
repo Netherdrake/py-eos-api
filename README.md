@@ -1,1 +1,51 @@
-hello, world.
+## Python EOS Api Client
+This is an unofficial API wrapper by [@furion](https://steemit.com/@furion)
+
+## Installation
+```
+pip install -U https://github.com/Netherdrake/py-eos-api
+```
+
+## Usage
+```
+from eosapi import Client                                                                               
+                                                                                                                
+c = Client(nodes=['http://localhost:8888'])                                                                                            
+                                                                                                                
+c.get_info()                                                                                            
+                                                                                                     
+    {'head_block_id': '0000652e92c1f73e14503383ee18c28901dd301ff5be0b94c77d846d799d5050',                           
+     'head_block_num': 25902,                                                                                       
+     'head_block_producer': 'initi',                                                                                
+     'head_block_time': '2017-09-16T04:25:18',                                                                      
+     'last_irreversible_block_num': 25884,                                                                          
+     'participation_rate': '1.00000000000000000',                                                                   
+     'recent_slots': '1111111111111111111111111111111111111111111111111111111111111111'}                            
+                                                                                                                
+c.get_account?     
+                                                                                     
+    Signature: c.get_account(name) -> dict                                                                          
+    Docstring: Fetch a blockchain account                                                                           
+    File:      ~/GitHub/EOS/py-eos-api/eosapi/api.py                                                                
+    Type:      method                                                                                               
+                                                                                                                    
+c.get_account('inita')               
+                                                                                                   
+    {'eos_balance': '1000000.0000 EOS',                                                                             
+     'last_unstaking_time': '1969-12-31T23:59:59',                                                                  
+     'name': 'inita',                                                                                               
+     'permissions': [{'name': 'active',                                                                             
+       'parent': 'owner',                                                                                           
+       'required_auth': {'accounts': [],                                                                            
+        'keys': [{'key': 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',                                   
+          'weight': 1}],                                                                                            
+        'threshold': 1}},                                                                                           
+      {'name': 'owner',                                                                                             
+       'parent': 'owner',                                                                                           
+       'required_auth': {'accounts': [],                                                                            
+        'keys': [{'key': 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV',                                   
+          'weight': 1}],                                                                                            
+        'threshold': 1}}],                                                                                          
+     'staked_balance': '0.0000 EOS',                                                                                
+     'unstaking_balance': '0.0000 EOS'}        
+```
