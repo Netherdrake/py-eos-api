@@ -49,3 +49,20 @@ c.get_account('inita')
      'staked_balance': '0.0000 EOS',                                                                                
      'unstaking_balance': '0.0000 EOS'}        
 ```
+
+You can also use a lower level `HttpClient` directly:
+```
+from eosapi import HttpClient     
+h = HttpClient(["http://localhost:8888"])
+print(h.exec('chain', 'get_block', '{"block_num_or_id": 5}'))
+print(h.exec('chain', 'get_block', {"block_num_or_id": 5}))
+print(h.exec('chain', 'get_info'))
+```
+
+### TODO
+ - add support for type hints _(Union[NativeType, PythonType])_
+ - split api into submodules to avoid potential collisions
+ - apigen: load from json spec files once they are finalized
+
+### License
+MIT
