@@ -75,7 +75,6 @@ class HttpClient(object):
 
         self.nodes = cycle(self._nodes(nodes))
         self.node_url = ''
-        self.request = None
         self.next_node()
 
         log_level = kwargs.get('log_level', logging.INFO)
@@ -126,7 +125,7 @@ class HttpClient(object):
                           (self.hostname, e.__class__.__name__))
             return self.exec(api, endpoint, body, _ret_cnt=_ret_cnt + 1)
         except Exception as e:
-            extra = dict(err=e, request=self.request)
+            extra = dict(err=e, url=url, body=body, method=method)
             logger.info('Request error', extra=extra)
             raise e
 
@@ -135,7 +134,8 @@ class HttpClient(object):
                 response=response,
                 body=body)
 
-    def _return(self, response=None, body=None):
+    @staticmethod
+    def _return(response=None, body=None):
         """ Process the response status code and body (json).
 
         Note:
@@ -172,7 +172,8 @@ class HttpClient(object):
 
         return result
 
-    def _body(self, body):
+    @staticmethod
+    def _body(body):
         if type(body) not in [str, dict, type(None)]:
             raise ValueError(
                 'Request body is of an invalid type %s' % type(body))
@@ -180,7 +181,8 @@ class HttpClient(object):
             return json.dumps(body)
         return body
 
-    def _nodes(self, nodes):
+    @staticmethod
+    def _nodes(nodes):
         if type(nodes) == str:
             nodes = nodes.split(',')
         return [x.rstrip('/') for x in nodes]
