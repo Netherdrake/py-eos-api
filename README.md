@@ -59,6 +59,15 @@ print(h.exec('chain', 'get_block', {"block_num_or_id": 5}))
 print(h.exec('chain', 'get_info'))
 ```
 
+You can also stream raw blocks (polling indefinitely):
+```
+from eosapi import Client                                                                                                                                                                                    
+c = Client()    
+
+for block in c.stream_blocks(start_block=100, mode='head'):
+    print(block) 
+```
+
 ### TODO
  - add support for type hints _(Union[NativeType, PythonType])_
  - split api into submodules to avoid potential collisions

@@ -1,3 +1,5 @@
+import time
+
 from eosapi import HttpClient
 
 
@@ -5,6 +7,33 @@ class Client(HttpClient):
     def __init__(self, nodes=None, **kwargs):
         nodes = nodes or ['http://localhost:8888']
         super().__init__(nodes=nodes, **kwargs)
+
+    def stream_blocks(self, start_block=None, mode='irreversible'):
+        """ Stream raw blocks.
+
+        Args:
+             start_block (int): Block number to start streaming from. If None,
+                                head block is used.
+             mode (str): `irreversible` or `head`.
+        """
+        mode = 'last_irreversible_block_num' if mode == 'irreversible' \
+            else 'head_block_number'
+
+        # convert block id to block number
+        if type(start_block) == str:
+            start_block = int(start_block[:8], base=16)
+
+        if not start_block:
+            start_block = self.get_info()[mode]
+
+        block_interval = 3  # todo: confirm this assumption trough api
+
+        while True:
+            head_block = self.get_info()[mode]
+            for block_num in range(start_block, head_block + 1):
+                yield self.get_block(block_num)
+            start_block = head_block + 1
+            time.sleep(block_interval)
 
     #############################
     # apigen.py generated methods
