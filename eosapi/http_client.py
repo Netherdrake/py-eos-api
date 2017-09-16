@@ -44,6 +44,7 @@ class HttpClient(object):
 
     def __init__(self, nodes, **kwargs):
         self.api_version = kwargs.get('api_version', 'v1')
+        self.max_retries = kwargs.get('max_retries', 10),
 
         if kwargs.get('tcp_keepalive', True):
             socket_options = HTTPConnection.default_socket_options + \
@@ -59,7 +60,7 @@ class HttpClient(object):
             num_pools=kwargs.get('num_pools', 50),
             maxsize=kwargs.get('maxsize', 10),
             block=kwargs.get('pool_block', False),
-            retries=kwargs.get('retries', 10),
+            retries=kwargs.get('http_retries', 10),
             timeout=timeout,
             socket_options=socket_options,
             headers={'Content-Type': 'application/json'},
@@ -72,7 +73,7 @@ class HttpClient(object):
             **response_kw)
         '''
 
-        self.nodes = cycle(nodes)
+        self.nodes = cycle(self._nodes(nodes))
         self.node_url = ''
         self.request = None
         self.next_node()
@@ -95,7 +96,7 @@ class HttpClient(object):
     def hostname(self):
         return urlparse(self.node_url).hostname
 
-    def exec(self, method, api, endpoint, body=None, _ret_cnt=0):
+    def exec(self, api, endpoint, body=None, _ret_cnt=0):
         """ Execute a method against eosd RPC.
 
         Warnings:
@@ -103,8 +104,11 @@ class HttpClient(object):
             node fail-over, unless we are broadcasting a transaction.
             In latter case, the exception is **re-raised**.
         """
+
+        url = f"{self.node_url}/{self.api_version}/{api}/{endpoint}"
+        body = self._body(body)
+        method = 'POST' if body else 'GET'
         try:
-            url = f"{self.node_url}/{self.api_version}/{api}/{endpoint}"
             response = self.http.urlopen(method, url, body=body)
         except (MaxRetryError,
                 ConnectionResetError,
@@ -112,7 +116,7 @@ class HttpClient(object):
                 RemoteDisconnected,
                 ProtocolError) as e:
 
-            if _ret_cnt >= 10:
+            if _ret_cnt >= self.max_retries:
                 raise e
 
             # try switching nodes before giving up
@@ -120,8 +124,7 @@ class HttpClient(object):
             self.next_node()
             logging.debug('Switched node to %s due to exception: %s' %
                           (self.hostname, e.__class__.__name__))
-            return self.exec(method, api, endpoint, body,
-                             _ret_cnt=_ret_cnt + 1)
+            return self.exec(api, endpoint, body, _ret_cnt=_ret_cnt + 1)
         except Exception as e:
             extra = dict(err=e, request=self.request)
             logger.info('Request error', extra=extra)
@@ -169,9 +172,22 @@ class HttpClient(object):
 
         return result
 
+    def _body(self, body):
+        if type(body) not in [str, dict, type(None)]:
+            raise ValueError(
+                'Request body is of an invalid type %s' % type(body))
+        if type(body) == dict:
+            return json.dumps(body)
+        return body
+
+    def _nodes(self, nodes):
+        if type(nodes) == str:
+            nodes = nodes.split(',')
+        return [x.rstrip('/') for x in nodes]
+
 
 if __name__ == '__main__':
     h = HttpClient(["http://localhost:8888"])
-    print(h.exec('POST', 'chain', 'get_block', '{"block_num_or_id":5}'))
-    print(h.exec('GET', 'chain', 'get_info'))
+    print(h.exec('chain', 'get_block', {"block_num_or_id": 5}))
+    print(h.exec('chain', 'get_info'))
     # h.exec('get_block', '{"block_num_or_id":5}')
