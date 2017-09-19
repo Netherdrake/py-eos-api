@@ -44,7 +44,7 @@ class HttpClient(object):
 
     def __init__(self, nodes, **kwargs):
         self.api_version = kwargs.get('api_version', 'v1')
-        self.max_retries = kwargs.get('max_retries', 10),
+        self.max_retries = kwargs.get('max_retries', 10)
 
         if kwargs.get('tcp_keepalive', True):
             socket_options = HTTPConnection.default_socket_options + \
@@ -189,7 +189,7 @@ class HttpClient(object):
 
 
 if __name__ == '__main__':
-    h = HttpClient(["http://localhost:8888"])
+    h = HttpClient(["http://localhost:8888", "http://localhost:8899"])
     print(h.exec('chain', 'get_block', {"block_num_or_id": 5}))
     print(h.exec('chain', 'get_info'))
     # h.exec('get_block', '{"block_num_or_id":5}')
