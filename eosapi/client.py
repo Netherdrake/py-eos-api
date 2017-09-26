@@ -260,12 +260,16 @@ class Client(HttpClient):
 
 class WalletClient(HttpClient):
     def __init__(self, host='localhost', port=8888, **kwargs):
-        host = host.split('//')[-1].split(':')[0]
-        if host not in ['localhost', '127.0.0.1']:
+        hostname = host.split('//')[-1].split(':')[0]
+        if hostname not in ['localhost', '127.0.0.1']:
             import warnings
-            warnings.warn(f"Using the wallet API on {host} might be insecure!")
+            warnings.warn(f"Using the wallet API on {hostname} might be insecure!")
 
-        nodes = [f"http://{host}:{port}"]
+        protocol = 'http'
+        if host.split(':')[0] == 'https' or kwargs.get('https'):
+            protocol = 'https'
+        nodes = [f"{protocol}://{hostname}:{port}"]
+        print(nodes)
         super().__init__(nodes=nodes, **kwargs)
 
 
