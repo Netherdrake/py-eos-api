@@ -269,7 +269,6 @@ class WalletClient(HttpClient):
         if host.split(':')[0] == 'https' or kwargs.get('https'):
             protocol = 'https'
         nodes = [f"{protocol}://{hostname}:{port}"]
-        print(nodes)
         super().__init__(nodes=nodes, **kwargs)
 
 
