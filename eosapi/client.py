@@ -77,7 +77,20 @@ class Client(HttpClient):
             body=body
         )
 
-    def get_table_rows_i64(self, scope, code, table, json, lower_bound, upper_bound, limit) -> dict:
+    def get_code(self, name) -> dict:
+        """ Fetch smart contract code """
+
+        body = dict(
+            name=name,
+        )
+
+        return self.exec(
+            api='chain',
+            endpoint='get_code',
+            body=body
+        )
+
+    def get_table_rows(self, scope, code, table, json, lower_bound, upper_bound, limit) -> dict:
         """ Fetch smart contract data from an account. """
 
         body = dict(
@@ -92,7 +105,7 @@ class Client(HttpClient):
 
         return self.exec(
             api='chain',
-            endpoint='get_table_rows_i64',
+            endpoint='get_table_rows',
             body=body
         )
 
@@ -126,16 +139,17 @@ class Client(HttpClient):
             body=body
         )
 
-    def get_types(self, account_name) -> dict:
-        """ Fetch account registered types """
+    def get_required_keys(self, transaction, available_keys) -> dict:
+        """ get_required_keys """
 
         body = dict(
-            account_name=account_name,
+            transaction=transaction,
+            available_keys=available_keys,
         )
 
         return self.exec(
             api='chain',
-            endpoint='get_types',
+            endpoint='get_required_keys',
             body=body
         )
 
@@ -165,17 +179,70 @@ class Client(HttpClient):
             body=body
         )
 
-    def get_required_keys(self, transaction, available_keys) -> dict:
-        """ get_required_keys """
+    def push_transactions(self, signed_transaction) -> dict:
+        """ Attempts to push transactions into the pending queue. """
 
         body = dict(
-            transaction=transaction,
-            available_keys=available_keys,
+            signed_transaction=signed_transaction,
         )
 
         return self.exec(
             api='chain',
-            endpoint='get_required_keys',
+            endpoint='push_transactions',
+            body=body
+        )
+
+    def get_transaction(self, transaction_id) -> dict:
+        """ Retrieve a transaction from the blockchain. """
+
+        body = dict(
+            transaction_id=transaction_id,
+        )
+
+        return self.exec(
+            api='account_history',
+            endpoint='get_transaction',
+            body=body
+        )
+
+    def get_transactions(self, account_name, skip_seq, num_seq) -> dict:
+        """ Retrieve all transactions with specific account name referenced in their scope. """
+
+        body = dict(
+            account_name=account_name,
+            skip_seq=skip_seq,
+            num_seq=num_seq,
+        )
+
+        return self.exec(
+            api='account_history',
+            endpoint='get_transactions',
+            body=body
+        )
+
+    def get_key_accounts(self, public_key) -> dict:
+        """ Retrieve accounts associated with a public key. """
+
+        body = dict(
+            public_key=public_key,
+        )
+
+        return self.exec(
+            api='account_history',
+            endpoint='get_key_accounts',
+            body=body
+        )
+
+    def get_controlled_accounts(self, controlling_account) -> dict:
+        """ Retrieve accounts which are created by the given account. """
+
+        body = dict(
+            controlling_account=controlling_account,
+        )
+
+        return self.exec(
+            api='account_history',
+            endpoint='get_controlled_accounts',
             body=body
         )
 

@@ -44,12 +44,25 @@ api_methods = {
             "staked_balance": "UInt64",
             "unstaking_balance": "UInt64",
             "last_unstaking_time": "Time",
-            "producer": "optional<producer_info>",
-            "abi": "optional<Abi>"
+            "producer": "Optional<producer_info>",
+            "abi": "Optional<Abi>"
         }
     },
 
-    "get_table_rows_i64": {
+    "get_code": {
+        "brief": "Fetch smart contract code",
+        "params": {
+            "name": "Name"
+        },
+        "results": {
+            "name": "Name",
+            "wast": "String",
+            "code_hash": "FixedBytes32",
+            "abi": "Optional<Abi>"
+        }
+    },
+
+    "get_table_rows": {
         "brief": "Fetch smart contract data from an account.",
         "params": {
             "scope": "Name",
@@ -100,12 +113,12 @@ api_methods = {
         }
     },
 
-    "get_types": {
-        "brief": "Fetch account registered types",
+    "get_required_keys": {
         "params": {
-            "account_name": "String"
+            "transaction": "Transaction",
+            "available_keys": "Set[PublicKey]"
         },
-        "results": "String[]"
+        "results": "Set[PublicKey]"
     },
 
     "push_block": {
@@ -124,12 +137,56 @@ api_methods = {
         "results": None
     },
 
-    "get_required_keys": {
+    "push_transactions": {
+        "brief": "Attempts to push transactions into the pending queue.",
         "params": {
-            "transaction": "Transaction",
-            "available_keys": "Set[PublicKey]"
+            "signed_transaction": "SignedTransaction[]"
         },
-        "results": "Set[PublicKey]"
+        "results": None
+    },
+
+    "get_transaction": {
+        "brief": "Retrieve a transaction from the blockchain.",
+        "params": {
+            "transaction_id": "FixedBytes32"
+        },
+        "results": {
+            "transaction_id": "FixedBytes32",
+            "transaction": "Transaction"
+        }
+    },
+
+    "get_transactions": {
+        "brief": "Retrieve all transactions with specific account name referenced in their scope.",
+        "params": {
+            "account_name": "AccountName",
+            "skip_seq": "Optional<UInt32>",
+            "num_seq": "Optional<UInt32>"
+        },
+        "results": {
+            "transactions": "OrderedTransaction[]",
+            "time_limit_exceeded_error": "Optional<Bool>"
+        }
+    },
+
+    "get_key_accounts": {
+        "brief": "Retrieve accounts associated with a public key.",
+        "params": {
+            "public_key": "PublicKey"
+        },
+        "results": {
+            "account_names": "AccountName[]"
+        }
+    },
+
+    "get_controlled_accounts": {
+        "brief": "Retrieve accounts which are created by the given account.",
+        "params": {
+            "controlling_account": "AccountName"
+        },
+        "results": {
+            "controlled_accounts": "AccountName[]"
+        }
     }
 
 }
@@ -137,10 +194,10 @@ api_methods = {
 method_template = """
 def {method_name}(self{method_arguments}){return_hints}:
     \"\"\" {docstring} \"\"\"
-    
+
     body = dict({body_args}
     )
-    
+
     return self.exec(
         api='{api}',
         endpoint='{method_name}',
