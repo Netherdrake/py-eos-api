@@ -1,0 +1,45 @@
+{
+  "get_transaction": {
+    "brief": "Retrieve a transaction from the blockchain.",
+    "params": {
+      "transaction_id": "FixedBytes32"
+    },
+    "results": {
+      "transaction_id": "FixedBytes32",
+      "transaction": "Transaction"
+    }
+  },
+
+  "get_transactions": {
+    "brief": "Retrieve all transactions with specific account name referenced in their scope.",
+    "params": {
+      "account_name": "AccountName",
+      "skip_seq": "Optional<UInt32>",
+      "num_seq": "Optional<UInt32>"
+    },
+    "results": {
+      "transactions": "OrderedTransaction[]",
+      "time_limit_exceeded_error": "Optional<Bool>"
+    }
+  },
+
+  "get_key_accounts": {
+    "brief": "Retrieve accounts associated with a public key.",
+    "params": {
+      "public_key": "PublicKey"
+    },
+    "results": {
+      "account_names": "AccountName[]"
+    }
+  },
+
+  "get_controlled_accounts": {
+    "brief": "Retrieve accounts which are created by the given account.",
+    "params": {
+      "controlling_account": "AccountName"
+    },
+    "results": {
+      "controlled_accounts": "AccountName[]"
+    }
+  }
+}

@@ -15,10 +15,10 @@ def readme_file():
 # yapf: disable
 setup(
     name='eosapi',
-    version='0.0.1',
-    description='Python EOS API',
+    version='0.0.2',
+    description='Python EOS API Wrapper',
     long_description=open(readme_file()).read(),
-    packages=find_packages(exclude=['scripts']),
+    packages=find_packages(exclude=['_spec']),
     setup_requires=['pytest-runner'],
     tests_require=['pytest',
                    'pep8',

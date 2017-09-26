@@ -1,0 +1,144 @@
+{
+  "get_info": {
+    "brief": "Return general network information.",
+    "params": null,
+    "results": {
+      "head_block_num": "UInt32",
+      "head_block_id": "FixedBytes32",
+      "head_block_time": "Time",
+      "head_block_producer": {"_id": "UInt16"},
+      "recent_slots": "String",
+      "participation_rate": "Double"
+    }
+  },
+
+  "get_block": {
+    "brief": "Fetch a block from the blockchain.",
+    "params": {
+      "block_num_or_id": "String"
+    },
+    "results": {
+      "previous":"UInt32",
+      "timestamp":"Time",
+      "transaction_merkle_root":"UInt32",
+      "producer": "UInt16",
+      "producer_signature":"Signature",
+      "cycles": "Thread[]"
+    },
+    "errors": {
+      "unknown block": null
+    }
+  },
+
+  "get_account": {
+    "brief": "Fetch a blockchain account",
+    "params": {
+      "name": "Name"
+    },
+    "results": {
+      "name": "Name",
+      "eos_balance": "UInt64",
+      "staked_balance": "UInt64",
+      "unstaking_balance": "UInt64",
+      "last_unstaking_time": "Time",
+      "producer": "Optional<producer_info>",
+      "abi": "Optional<Abi>"
+    }
+  },
+
+  "get_code": {
+    "brief": "Fetch smart contract code",
+    "params": {
+      "name": "Name"
+    },
+    "results": {
+      "name": "Name",
+      "wast": "String",
+      "code_hash": "FixedBytes32",
+      "abi": "Optional<Abi>"
+    }
+  },
+
+  "get_table_rows": {
+    "brief": "Fetch smart contract data from an account.",
+    "params": {
+      "scope": "Name",
+      "code": "Name",
+      "table": "Name",
+      "json": { "type": "Bool", "default": false},
+      "lower_bound": {"type": "UInt64", "default": "0"},
+      "upper_bound": {"type": "UInt64", "default": "-1"},
+      "limit": {"type": "UInt32", "default": "10"}
+    },
+    "results": {
+      "rows": {
+        "type": "Vector",
+        "doc": "one row per item, either encoded as hex String or JSON object"
+      },
+      "more": {
+        "type": "Bool",
+        "doc": "true if last element"
+      }
+    }
+  },
+
+  "abi_json_to_bin": {
+    "brief": "Manually serialize json into binary hex.  The binayargs is usually stored in Message.data.",
+    "params": {
+      "code": "Name",
+      "action": "Name",
+      "args": "Bytes"
+    },
+    "results": {
+      "binargs": "Bytes",
+      "required_scope": "Name[]",
+      "required_auth": "Name[]"
+    }
+  },
+
+  "abi_bin_to_json": {
+    "brief": "Convert bin hex back into Abi json definition.",
+    "params": {
+      "code": "Name",
+      "action": "Name",
+      "binargs": "Bytes"
+    },
+    "results": {
+      "args": "Bytes",
+      "required_scope": "Name[]",
+      "required_auth": "Name[]"
+    }
+  },
+
+  "get_required_keys": {
+    "params": {
+      "transaction": "Transaction",
+      "available_keys": "Set[PublicKey]"
+    },
+    "results": "Set[PublicKey]"
+  },
+
+  "push_block": {
+    "brief": "Append a block to the chain database.",
+    "params": {
+      "block": "Block"
+    },
+    "results": null
+  },
+
+  "push_transaction": {
+    "brief": "Attempts to push the transaction into the pending queue.",
+    "params": {
+      "signed_transaction": "SignedTransaction"
+    },
+    "results": null
+  },
+
+  "push_transactions": {
+    "brief": "Attempts to push transactions into the pending queue.",
+    "params": {
+      "signed_transaction": "SignedTransaction[]"
+    },
+    "results": null
+  }
+}

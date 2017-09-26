@@ -1,195 +1,7 @@
 import sys
+import json
 from functools import partial
 
-api_methods = {
-    "get_info": {
-        "brief": "Return general network information.",
-        "params": None,
-        "results": {
-            "head_block_num": "UInt32",
-            "head_block_id": "FixedBytes32",
-            "head_block_time": "Time",
-            "head_block_producer": {"_id": "UInt16"},
-            "recent_slots": "String",
-            "participation_rate": "Double"
-        }
-    },
-
-    "get_block": {
-        "brief": "Fetch a block from the blockchain.",
-        "params": {
-            "block_num_or_id": "String"
-        },
-        "results": {
-            "previous": "UInt32",
-            "timestamp": "Time",
-            "transaction_merkle_root": "UInt32",
-            "producer": "UInt16",
-            "producer_signature": "Signature",
-            "cycles": "Thread[]"
-        },
-        "errors": {
-            "unknown block": None
-        }
-    },
-
-    "get_account": {
-        "brief": "Fetch a blockchain account",
-        "params": {
-            "name": "Name"
-        },
-        "results": {
-            "name": "Name",
-            "eos_balance": "UInt64",
-            "staked_balance": "UInt64",
-            "unstaking_balance": "UInt64",
-            "last_unstaking_time": "Time",
-            "producer": "Optional<producer_info>",
-            "abi": "Optional<Abi>"
-        }
-    },
-
-    "get_code": {
-        "brief": "Fetch smart contract code",
-        "params": {
-            "name": "Name"
-        },
-        "results": {
-            "name": "Name",
-            "wast": "String",
-            "code_hash": "FixedBytes32",
-            "abi": "Optional<Abi>"
-        }
-    },
-
-    "get_table_rows": {
-        "brief": "Fetch smart contract data from an account.",
-        "params": {
-            "scope": "Name",
-            "code": "Name",
-            "table": "Name",
-            "json": {"type": "Bool", "default": False},
-            "lower_bound": {"type": "UInt64", "default": "0"},
-            "upper_bound": {"type": "UInt64", "default": "-1"},
-            "limit": {"type": "UInt32", "default": "10"}
-        },
-        "results": {
-            "rows": {
-                "type": "Vector",
-                "doc": "one row per item, either encoded as hex String or JSON object"
-            },
-            "more": {
-                "type": "Bool",
-                "doc": "true if last element"
-            }
-        }
-    },
-
-    "abi_json_to_bin": {
-        "brief": "Manually serialize json into binary hex.  The binayargs is usually stored in Message.data.",
-        "params": {
-            "code": "Name",
-            "action": "Name",
-            "args": "Bytes"
-        },
-        "results": {
-            "binargs": "Bytes",
-            "required_scope": "Name[]",
-            "required_auth": "Name[]"
-        }
-    },
-
-    "abi_bin_to_json": {
-        "brief": "Convert bin hex back into Abi json definition.",
-        "params": {
-            "code": "Name",
-            "action": "Name",
-            "binargs": "Bytes"
-        },
-        "results": {
-            "args": "Bytes",
-            "required_scope": "Name[]",
-            "required_auth": "Name[]"
-        }
-    },
-
-    "get_required_keys": {
-        "params": {
-            "transaction": "Transaction",
-            "available_keys": "Set[PublicKey]"
-        },
-        "results": "Set[PublicKey]"
-    },
-
-    "push_block": {
-        "brief": "Append a block to the chain database.",
-        "params": {
-            "block": "Block"
-        },
-        "results": None
-    },
-
-    "push_transaction": {
-        "brief": "Attempts to push the transaction into the pending queue.",
-        "params": {
-            "signed_transaction": "SignedTransaction"
-        },
-        "results": None
-    },
-
-    "push_transactions": {
-        "brief": "Attempts to push transactions into the pending queue.",
-        "params": {
-            "signed_transaction": "SignedTransaction[]"
-        },
-        "results": None
-    },
-
-    "get_transaction": {
-        "brief": "Retrieve a transaction from the blockchain.",
-        "params": {
-            "transaction_id": "FixedBytes32"
-        },
-        "results": {
-            "transaction_id": "FixedBytes32",
-            "transaction": "Transaction"
-        }
-    },
-
-    "get_transactions": {
-        "brief": "Retrieve all transactions with specific account name referenced in their scope.",
-        "params": {
-            "account_name": "AccountName",
-            "skip_seq": "Optional<UInt32>",
-            "num_seq": "Optional<UInt32>"
-        },
-        "results": {
-            "transactions": "OrderedTransaction[]",
-            "time_limit_exceeded_error": "Optional<Bool>"
-        }
-    },
-
-    "get_key_accounts": {
-        "brief": "Retrieve accounts associated with a public key.",
-        "params": {
-            "public_key": "PublicKey"
-        },
-        "results": {
-            "account_names": "AccountName[]"
-        }
-    },
-
-    "get_controlled_accounts": {
-        "brief": "Retrieve accounts which are created by the given account.",
-        "params": {
-            "controlling_account": "AccountName"
-        },
-        "results": {
-            "controlled_accounts": "AccountName[]"
-        }
-    }
-
-}
 
 method_template = """
 def {method_name}(self{method_arguments}){return_hints}:
@@ -207,12 +19,12 @@ def {method_name}(self{method_arguments}){return_hints}:
 """
 
 
-def api_codegen():
+def api_codegen(api_name, api_spec):
     """ Generates Python methods from steemd JSON API spec. Prints to stdout. """
-    for endpoint_name, endpoint in api_methods.items():
+    for endpoint_name, endpoint in api_spec.items():
         # method_arg_mapper = partial(map, lambda x: ', %s: %s' % (x[0], x[1]))
         call_arg_mapper = partial(map, lambda x: f', {x}')
-        body_arg_mapper = partial(map, lambda x: f'\n\t\t{x}={x},')
+        body_arg_mapper = partial(map, lambda x: f'\n\t{x}={x},')
 
         def parse_params(params, fn):
             if params is None:
@@ -229,39 +41,21 @@ def api_codegen():
             call_arguments=parse_params(endpoint.get('params', {}), call_arg_mapper),
             body_args=parse_params(endpoint.get('params', {}), body_arg_mapper),
             return_hints=return_hints,
-            api='chain',
+            api=api_name,
             docstring=endpoint.get('brief', endpoint_name)
         )
         sys.stdout.write(fn)
 
 
-# def find_api(method_name):
-#     """ Given a method name, find its API. """
-#     endpoint = first(where(api_methods, method=method_name))
-#     if endpoint:
-#         return endpoint.get('api')
+def load_spec(api_name):
+    with open(f"../_spec/{api_name}.json", 'r') as f:
+        data = f.read()
 
+    return api_name, json.loads(data)
 
-# def inspect_api_coverage():
-#     """ Compare implemented methods with current live deployment of eosd. """
-#     _apis = distinct(pluck('api', api_methods))
-#     _methods = set(pluck('method', api_methods))
-#
-#     avail_methods = []
-#     s = Steem(re_raise=False)
-#     for api in _apis:
-#         err = s.exec('nonexistentmethodcall', api=api)
-#         [avail_methods.append(x) for x in err['data']['stack'][0]['data']['api'].keys()]
-#
-#     avail_methods = set(avail_methods)
-#
-#     print("\nMissing Methods:")
-#     pprint(avail_methods - _methods)
-#
-#     print("\nLikely Deprecated Methods:")
-#     pprint(_methods - avail_methods)
 
 
 if __name__ == '__main__':
-    api_codegen()
+    api_codegen(*load_spec('chain'))
+    # api_codegen(*load_spec('account_history'))
     # inspect_api_coverage()
