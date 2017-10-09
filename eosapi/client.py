@@ -35,15 +35,14 @@ class Client(HttpClient):
             start_block = head_block + 1
             time.sleep(block_interval)
 
-
     ##############################
-    ## apigen.py generated methods
-    ## bellow this point
+    # apigen.py generated methods
+    # below this point
     ##############################
 
-    #---------------------------
+    # ---------------------------
     # /v1/chain/*
-    #---------------------------
+    # ---------------------------
     def get_info(self) -> dict:
         """ Return general network information. """
 
@@ -197,10 +196,9 @@ class Client(HttpClient):
             body=body
         )
 
-
-    #---------------------------
+    # ---------------------------
     # /v1/account_history/*
-    #---------------------------
+    # ---------------------------
     def get_transaction(self, transaction_id) -> dict:
         """ Retrieve a transaction from the blockchain. """
 
@@ -213,7 +211,6 @@ class Client(HttpClient):
             endpoint='get_transaction',
             body=body
         )
-
 
     def get_transactions(self, account_name, skip_seq, num_seq) -> dict:
         """ Retrieve all transactions with specific account name referenced in their scope. """
@@ -230,7 +227,6 @@ class Client(HttpClient):
             body=body
         )
 
-
     def get_key_accounts(self, public_key) -> dict:
         """ Retrieve accounts associated with a public key. """
 
@@ -243,7 +239,6 @@ class Client(HttpClient):
             endpoint='get_key_accounts',
             body=body
         )
-
 
     def get_controlled_accounts(self, controlling_account) -> dict:
         """ Retrieve accounts which are created by the given account. """
@@ -258,6 +253,7 @@ class Client(HttpClient):
             body=body
         )
 
+
 class WalletClient(HttpClient):
     def __init__(self, host='localhost', port=8888, **kwargs):
         hostname = host.split('//')[-1].split(':')[0]
@@ -268,11 +264,11 @@ class WalletClient(HttpClient):
         protocol = 'http'
         if host.split(':')[0] == 'https' or kwargs.get('https'):
             protocol = 'https'
-        nodes = [f"{protocol}://{hostname}:{port}"]
+        nodes = [f"{protocol}://{hostname}:{port}".rstrip(':')]
         super().__init__(nodes=nodes, **kwargs)
 
 
-    # TODO: API gen wallet methods
+        # TODO: API gen wallet methods
 
 
 if __name__ == '__main__':
