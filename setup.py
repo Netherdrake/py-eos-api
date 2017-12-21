@@ -5,7 +5,8 @@ import sys
 from setuptools import find_packages
 from setuptools import setup
 
-assert sys.version_info[0] == 3 and sys.version_info[1] >= 6, "eosapi requires Python 3.6 or newer."
+assert sys.version_info[0] == 3 and sys.version_info[1] >= 6, \
+    "eosapi requires Python 3.6 or newer."
 
 
 def readme_file():
