@@ -16,7 +16,7 @@ def readme_file():
 # yapf: disable
 setup(
     name='eosapi',
-    version='0.0.2',
+    version='0.4',
     description='Python EOS API Wrapper',
     long_description=open(readme_file()).read(),
     packages=find_packages(exclude=['_spec']),
