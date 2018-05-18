@@ -1,7 +1,6 @@
-import sys
 import json
+import sys
 from functools import partial
-
 
 method_template = """
 def {method_name}(self{method_arguments}){return_hints}:
@@ -54,8 +53,7 @@ def load_spec(api_name):
     return api_name, json.loads(data)
 
 
-
 if __name__ == '__main__':
-    api_codegen(*load_spec('chain'))
-    # api_codegen(*load_spec('account_history'))
+    # api_codegen(*load_spec('chain'))
+    api_codegen(*load_spec('history'))
     # inspect_api_coverage()

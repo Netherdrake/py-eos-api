@@ -43,6 +43,35 @@ class Client(HttpClient):
     # ---------------------------
     # /v1/chain/*
     # ---------------------------
+    def get_currency_balance(self, code, account, symbol) -> dict:
+        """ get_currency_balance """
+
+        body = dict(
+            code=code,
+            account=account,
+            symbol=symbol,
+        )
+
+        return self.exec(
+            api='chain',
+            endpoint='get_currency_balance',
+            body=body
+        )
+
+    def get_currency_stats(self, code, symbol) -> dict:
+        """ get_currency_stats """
+
+        body = dict(
+            code=code,
+            symbol=symbol,
+        )
+
+        return self.exec(
+            api='chain',
+            endpoint='get_currency_stats',
+            body=body
+        )
+
     def get_info(self) -> dict:
         """ Return general network information. """
 
@@ -68,11 +97,11 @@ class Client(HttpClient):
             body=body
         )
 
-    def get_account(self, name) -> dict:
+    def get_account(self, account_name) -> dict:
         """ Fetch a blockchain account """
 
         body = dict(
-            name=name,
+            account_name=account_name,
         )
 
         return self.exec(
@@ -81,11 +110,11 @@ class Client(HttpClient):
             body=body
         )
 
-    def get_code(self, name) -> dict:
+    def get_code(self, account_name) -> dict:
         """ Fetch smart contract code """
 
         body = dict(
-            name=name,
+            account_name=account_name,
         )
 
         return self.exec(
@@ -94,14 +123,16 @@ class Client(HttpClient):
             body=body
         )
 
-    def get_table_rows(self, scope, code, table, json, lower_bound, upper_bound, limit) -> dict:
+    def get_table_rows(self, json, code, scope, table, table_key, lower_bound,
+                       upper_bound, limit) -> dict:
         """ Fetch smart contract data from an account. """
 
         body = dict(
-            scope=scope,
-            code=code,
-            table=table,
             json=json,
+            code=code,
+            scope=scope,
+            table=table,
+            table_key=table_key,
             lower_bound=lower_bound,
             upper_bound=upper_bound,
             limit=limit,
@@ -183,11 +214,11 @@ class Client(HttpClient):
             body=body
         )
 
-    def push_transactions(self, signed_transaction) -> dict:
+    def push_transactions(self, signed_transactions) -> dict:
         """ Attempts to push transactions into the pending queue. """
 
         body = dict(
-            signed_transaction=signed_transaction,
+            signed_transactions=signed_transactions,
         )
 
         return self.exec(
@@ -197,59 +228,33 @@ class Client(HttpClient):
         )
 
     # ---------------------------
-    # /v1/account_history/*
+    # /v1/history/*
     # ---------------------------
-    def get_transaction(self, transaction_id) -> dict:
-        """ Retrieve a transaction from the blockchain. """
-
-        body = dict(
-            transaction_id=transaction_id,
-        )
-
-        return self.exec(
-            api='account_history',
-            endpoint='get_transaction',
-            body=body
-        )
-
-    def get_transactions(self, account_name, skip_seq, num_seq) -> dict:
-        """ Retrieve all transactions with specific account name referenced in their scope. """
+    def get_actions(self, account_name, pos, offset) -> dict:
+        """ get_actions """
 
         body = dict(
             account_name=account_name,
-            skip_seq=skip_seq,
-            num_seq=num_seq,
+            pos=pos,
+            offset=offset,
         )
 
         return self.exec(
-            api='account_history',
-            endpoint='get_transactions',
+            api='history',
+            endpoint='get_actions',
             body=body
         )
 
-    def get_key_accounts(self, public_key) -> dict:
-        """ Retrieve accounts associated with a public key. """
+    def get_transaction(self, id) -> dict:
+        """ Retrieve a transaction from the blockchain. """
 
         body = dict(
-            public_key=public_key,
+            id=id,
         )
 
         return self.exec(
-            api='account_history',
-            endpoint='get_key_accounts',
-            body=body
-        )
-
-    def get_controlled_accounts(self, controlling_account) -> dict:
-        """ Retrieve accounts which are created by the given account. """
-
-        body = dict(
-            controlling_account=controlling_account,
-        )
-
-        return self.exec(
-            api='account_history',
-            endpoint='get_controlled_accounts',
+            api='history',
+            endpoint='get_transaction',
             body=body
         )
 
@@ -266,7 +271,6 @@ class WalletClient(HttpClient):
             protocol = 'https'
         nodes = [f"{protocol}://{hostname}:{port}".rstrip(':')]
         super().__init__(nodes=nodes, **kwargs)
-
 
         # TODO: API gen wallet methods
 
